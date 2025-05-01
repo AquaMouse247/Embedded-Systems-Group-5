@@ -1,0 +1,12 @@
+"./RGBLed.obj"
+"./SENSORS.obj"
+"./callForHeat.obj"
+"./codeFlow.obj"
+"./ignitorLED.obj"
+"./main.obj"
+"./mainValve.obj"
+"./pilotValve.obj"
+"./timers.obj"
+"../lnk_msp430fr2355.cmd"
+-lfrwp_init.a
+-llibc.a
