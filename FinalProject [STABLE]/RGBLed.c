@@ -2,7 +2,7 @@
 #include <RGBLed.h>
 #include <SYSTEM.h>
 
-enum systemStates{HEATING, IDLE, FLAMELOST, OVERHEAT, GREEN};
+enum systemStates{HEATING, IDLE, FLAMELOST, OVERHEAT, RANGE};
 
 void RGBInit()
 {
@@ -39,41 +39,39 @@ void setRGBColor(char red, char green, char blue)
     TB3CCR1 = blue << 2;
 }
 
-// Sets the color of an RGB LED using red, green, and blue color values between
-// 0 and 255.
+// Sets the color of an RGB LED based on the given state.
 void setSystemStatus(int state)
 {
     char red;
     char green;
     char blue;
-    int blink = 0;
 
     switch (state)
     {
-        case systemStates.IDLE: // Blue
-            red = 0;
-            green = 0;
-            blue = 255;
-            break;
-        case systemStates.HEATING: // Orange
+        case HEATING: // Orange
             red = 255;
             green = 153;
             blue = 0;
             blink = 0;
             break;
-        case systemStates.FLAMELOST: // Red
+        case IDLE: // Blue
+            red = 0;
+            green = 0;
+            blue = 255;
+            break;
+        case FLAMELOST: // Red
             red = 255;
             green = 0;
             blue = 0;
             blink = 0;
             break;
-        case systemStates.GREEN: // Within range
+        case RANGE: // Within range
             red = 0;
             green = 255;
             blue = 0;
             blink = 0;
             break;
-        case systemStates.OVERHEAT: // Purple
+        case OVERHEAT: // Purple
             red = 144;
             green = 0;
             blue = 255;
@@ -85,9 +83,4 @@ void setSystemStatus(int state)
     TB3CCR2 = green << 2;       // Set intensity of green LED
     TB3CCR1 = blue << 2;        // Set intensity of blue LED
 
-    
-    /*if (blink > 0)
-    {
-        while (1) __delay_cycles(delay)
-    }*/
 }

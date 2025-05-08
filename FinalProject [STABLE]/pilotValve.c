@@ -1,7 +1,7 @@
 #include <msp430.h>
 #include <PILOTVALVE.h>
 
-void pilotInit()
+void pilotValveInit()
 {
     // Configure P5.0 (Pilot Valve)
     P5OUT &= ~BIT0;                         // Clear P5.0 output latch for a defined power-on state

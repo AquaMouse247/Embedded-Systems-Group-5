@@ -1,13 +1,14 @@
 #include <msp430.h>
 #include "SYSTEM.h"
 #include "intrinsics.h"
+#include <stdio.h>
 
-enum systemStates{HEATING, IDLE, FLAMELOST, OVERHEAT, GREEN};
-systemStates state = IDLE;
+enum systemStates{HEATING, IDLE, FLAMELOST, OVERHEAT, RANGE}    // Defines all system states
+state = IDLE;   // Set initial system state
 
-char CFH = 0;   // Holds the call for heat value
+char CFH = 0;           // Holds the call for heat value
 char flameTimeout = 0;  // Holds the flame timer's timeout value
-int flameLosses = 0;
+int flameLosses = 0;    // Holds the number of times the flame has been lost
 
 
 int main(void)
@@ -20,117 +21,77 @@ int main(void)
     PM5CTL0 &= ~LOCKLPM5;                   // Disable the GPIO power-on default high-impedance mode
                                             // to activate previously configured port settings
 
-    /*
-    while(systemStates.HEAT)
+    // Initialize all subsystems
+    RGBInit();
+    pilotValveInit();
+    mainValveInit();
+    ignitorInit();
+    ADCInit();
+
+    __bis_SR_register(GIE);  // Enable global interrupts
+
+    
+    while(1)
     {
-        
-        startFlameTimer();
-        controlIgnitor(1);                  // Turn on the ignitor
-        controlPilotValve(1);               // Open the pilot valve
-        Wait2Seconds();
+      __delay_cycles(100000);
+      char cfh = 0;
+      cfh = readCFH();
 
-        while(!flameTimeout)
-        {
-            char flame = readThermocouple();                 // Check for a flame
-            if (flame==1) break;
-        }
-
-        if (flame==0)
-        {
-            flameLosses++;        //Add to flame loss count
-            break;
-        }
-        
-
-
-
-        //while(!CallForHeat() || !checkFlame() || !checkBoilerOverheat())
-        while (1) 
-        {
-            if(!CallForHeat())
-            {
-                break;
-            }
-
-            if(!checkFlame())
-            {
-                FLAME_EXTINGUISHED = 1;
-                break;
-            }
-
-            if(!checkBoilerOverheat())
-            {
-                OVERHEAT = 1;
-                break;
-            }
-        }
-
-        turnOffMainValve();
-        turnOffPilotValve();
-        turnOffIgnitor();
-
-
-        __bis_SR_register(CPUOFF)
-    }
-    */
-
-    if (state==systemStates.HEATING) //Call for heat received Heating state activated
-    {
-      displaySystemStatus(state); //RGB LED would change color to indicate CFH received
-      controlPilotValve(1);
-       
-      int setpoint = potRead();
-
-      controlMainValve(setpoint);
-      displaySystemStatus(state);  //RGB LED would change color to indicate heating status
-      while(thermRead() < setpoint) //While the boiler temp is less than the setpoint
+      // Check for call for heat
+      if (cfh==1) // Call for heat received   
       {
-        if (!flameDetect()) //If flame turns off during heating
-        {
-            controlMainValve(500); //Turn off main valve
-            controlPilotValve(0); //Close pilot valve
-            flameLosses++;        //Add to flame count
-            if (flameLosses > 5)
-            {
-                startFiveMinuteTimer();  // If there have been more than five flame
-                                    // losses, wait five minutes first.
-            }
-            controlIgnitor(1);
-        }
-        // If the flame is active, continue heating
-        wait(samplingTime);
+        state=HEATING;
+        controlIgnitor(1);
+        __delay_cycles(100000);
+        controlIgnitor(0);
       }
-     
-      // Finished heating
-      displaySystemStatus(state);
-      controlMainValve(500);
-      controlPilotValve(0);
-      state = systemStates.IDLE;
-    }
-
-  }
-
-
-void startPilotFlame()
-{
-    startFiveMinuteTimer();                              //Timer for flame detection starts
-    controlPilotValve(1);                            //Pilot Valve is opened
-    controlIgnitor(1);           //Ignitor turns on
-
-
-
-
-    while (!flameDetect())  //While no flame is detected
-    {
-      displaySystemStatus(state);     //RGB color changes to indicate no flame
-      if (flameTimeout)     //If the timer flag which indicates the timer runs out is active
+      else // Remain in idle state  
       {
-        controlPilotValve(0); //Pilot valve closes
-        controlIgnitor(0); //Ignitor turns off
-        return; // Go back to the beginning
+        state=IDLE;
+        controlPilotValve(0);
+        controlMainValve(500);
       }
+      __delay_cycles(100000);
+
+      if (state==HEATING) // Call for heat received Heating state activated
+      {
+        __delay_cycles(100000);
+        setSystemStatus(state); // RGB LED would change color to indicate CFH received
+        controlPilotValve(1);   // Open pilot valve
+        
+        int setpoint = 0;
+        setpoint = potRead();
+
+        controlMainValve(setpoint);
+        setSystemStatus(state);  // RGB LED would change color to indicate heating status
+        int therm = thermRead();
+        while(therm < setpoint) // While the boiler temp is less than the setpoint
+        {
+          int therm = thermRead();
+
+          if (!flameDetect()) // If flame turns off during heating
+          {
+              controlMainValve(500); // Turn off main valve
+              controlPilotValve(0); // Close pilot valve
+              flameLosses++;        // Add to flame count
+              if (flameLosses > 5)
+              {
+                  initFiveMinuteTimer();  // If there have been more than five flame
+                                      // losses, wait five minutes first.
+              }
+              controlIgnitor(1);
+          }
+          // If the flame is active, continue heating
+          __delay_cycles(100000);
+        }
+      
+        // Finished heating
+        state = IDLE;
+        setSystemStatus(state);
+        controlMainValve(500);    // Close main valve
+        controlPilotValve(0);     // Close pilot valve
+      }
+
     }
-    // Flame was detected
-    displaySystemStatus(state); //RGB LED indicates flame is active
-    controlIgnitor(0); //Ignitor turns off
+    
 }

@@ -5,7 +5,3 @@
 #include "PILOTVALVE.h"
 #include "MAINVALVE.H"
 #include "TIMERS.h"
-
-
-//enum systemStates{HEATING, IDLE, FLAMELOST, OVERHEAT, GREEN};
-//systemState state = IDLE;

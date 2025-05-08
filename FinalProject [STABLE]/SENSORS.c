@@ -8,8 +8,10 @@
 // Thermocouple - P1.3/A3
 // Potentiometer - P1.4/A4
 
-char ADCReading = 0;
-unsigned int ADCResult = 0;
+char ADCReading = 0;                // Determines if the ADC is currently reading in data.
+                                    // If 1, data is being read. If 0, data is not being read.
+
+unsigned int ADCResult = 0;         // Holds the value read in by the ADC.
 
 unsigned int thermRead()
 {
@@ -21,17 +23,14 @@ char flameDetect()
     return readADC(3) > FLAMEVALUE;
 }
 
-
 unsigned int potRead()
 {
-    // Min output -> 0
-    // Max output -> 4095 (2^12)
     return readADC(4);
 }
 
 void ADCInit()
 {
-    // Configure ADC pins (this should be in init)
+    // Configure ADC pins
     P1SEL0 |= BIT3 | BIT4 | BIT5;
     P1SEL1 |= BIT3 | BIT4 | BIT5;
 
@@ -46,6 +45,7 @@ void ADCInit()
 
 unsigned int readADC(char readChannel)
 {
+    // Determince which channel the ADC should be read from
     switch(readChannel)
     {
         case 3:
@@ -61,24 +61,13 @@ unsigned int readADC(char readChannel)
             ADCMCTL0 |= ADCINCH_5;
             break;
     }
-    ADCReading = 1;
+    ADCReading = 1;                    // Set ADC to reading
     //ADCMCTL0 &= ~ADCINCH
     //ADCCTL0 &= ~ADCENC;
-    //ADCMCTL0 |= readChannel            // ADC input select; Vref=AVCC
+    //ADCMCTL0 |= readChannel          // ADC input select; Vref=AVCC
     ADCCTL0 |= ADCENC | ADCSC;         // Sampling and conversion start
-    while(ADCReading);
+    while(ADCReading);                 // Wait for ADC to finish reading
     return ADCResult;
-}
-
-unsigned int valveSetpoint(int pot, int therm)
-{
-    // Calculate the difference between the pot setpoint
-    // and the current boiler temp from the thermistor.
-
-    
-
-    int valve = 0;
-    return valve;
 }
 
 // ADC interrupt service routine

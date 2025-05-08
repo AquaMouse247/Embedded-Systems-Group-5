@@ -1,9 +1,9 @@
 #include <msp430.h>
 #include "TIMERS.h"
 
-volatile unsigned int overflowCount = 0;
+volatile unsigned int overflowCount = 0;    // Stores the timer's overflow value
 
-void fiveMinuteTimerInit()
+void startFiveMinuteTimer()
 {
 
     // Set P1.0 as output for LED
@@ -14,26 +14,9 @@ void fiveMinuteTimerInit()
     TB0CTL = TBSSEL__SMCLK | ID__8 | MC__CONTINUOUS | TBCLR; 
     // SMCLK, input divider /8, continuous mode, clear timer
 
-    TB0CCTL0 = CCIE;                // Enable interrupt on CCR0 (optional)
+    TB0CCTL0 = CCIE;                // Enable interrupt on CCR0
     TB0CTL |= TBIE;                 // Enable Timer_B overflow interrupt
 
-    //__enable_interrupt();           // Enable global interrupts
-}
-
-void thirstySecondTimerInit()
-{
-
-    // Set P1.0 as output for LED
-    P1DIR |= BIT0;
-    P1OUT &= ~BIT0;
-
-    // Timer_B setup: SMCLK (1MHz), divide by 8, continuous mode
-    TB0CTL = TBSSEL__SMCLK | ID__8 | MC__CONTINUOUS | TBCLR;
-
-    TB0CTL |= TBIE;          // Enable Timer_B overflow interrupt
-    TB0CTL &= ~TBIFG;        // Clear any pending overflow flag
-
-    //__enable_interrupt();    // Enable global interrupts
 }
 
 // Timer_B overflow ISR
@@ -46,10 +29,9 @@ __interrupt void TIMER0_B1_ISR(void)
         if (overflowCount >= OVERFLOWS_FOR_5_MINUTES)
         {
             overflowCount = 0;
-            P1OUT ^= BIT0; // Toggle LED for example
+            P1OUT ^= BIT0; // Toggle LED for verification
         }
         break;
     default: break;
     }
 }
-

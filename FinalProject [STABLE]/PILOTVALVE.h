@@ -11,7 +11,7 @@ void pilotValveInit();
 
 /*
     void controlPilotValve(char state);
-    Used to open and close the pilot valve base on the input state.
+    Used to open and close the pilot valve based on the input state.
     If state==1, the valve is opened. If state==0, the valve is closed.
 */
 void controlPilotValve(char state);

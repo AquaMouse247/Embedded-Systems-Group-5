@@ -3,8 +3,8 @@
 // Function Prototypes
 
 /*
-    void pilotValveInit();
-    Used to initiate the pins needed for the pilot valve
+    void mainValveInit();
+    Used to initiate the pins needed for the main valve
     to operate.
 */
 void mainValveInit();

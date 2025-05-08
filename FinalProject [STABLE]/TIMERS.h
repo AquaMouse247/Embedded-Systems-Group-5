@@ -1,10 +1,10 @@
 #include <msp430.h>
 
+/*
+    void startFiveMinuteTimer();
+    Initializes the Timer_B module and starts a five minute timer.
+*/
+void startFiveMinuteTimer();
 
-void fiveMinuteTimerInit();
 
-void thirstySecondTimerInit();
-
-#define OVERFLOWS_FOR_5_MINUTES 572 // Calculated below (maybe 229)
-//#define OVERFLOWS_FOR_30_SECONDS 57  // See calculation below
-
+#define OVERFLOWS_FOR_5_MINUTES 572

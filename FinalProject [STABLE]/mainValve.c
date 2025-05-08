@@ -29,32 +29,6 @@ void mainValveInit()
 
 void controlMainValve(int setpoint)
 {
+
     TB1CCR1 = setpoint;                            // CCR1 PWM duty cycle
 }
-
- /*
-void mainValveInit()
-{
-    P2DIR |= BIT0;             // Set P2.0 as output
-    P2SEL0 |= BIT0;            // Select primary peripheral function
-    P2SEL1 &= ~BIT0;           // (TB1.1 output)
-
-    // Configure Timer B1 for PWM
-    TB1CCR0 = 20000 - 1;       // Set period to 20 ms (20,000 counts @ 1 MHz)
-    // 500 -> -90 degrees
-    // 1500 -> 0 degrees
-    // 2500 -> +90 degrees
-
-
-    TB1CCTL1 = OUTMOD_7;       // Reset/Set output mode (typical for PWM)
-    TB1CCR1 = 1500;            // Initial duty cycle: 1.5 ms pulse (center/neutral for servo)
-
-    TB1CTL = TBSSEL__SMCLK | MC__UP | TBCLR;  // Use SMCLK, Up mode, clear TBR
-}
-
-void controlMainValve(int setpoint)
-{
-    // 'setpoint' should be between ~1000 (1 ms) and ~2000 (2 ms)
-    TB1CCR1 = setpoint;
-}
-*/
